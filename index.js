@@ -1,23 +1,35 @@
 const serverless = require("serverless-http");
 const express = require("express");
 const app = express();
+const line = require("@line/bot-sdk");
 
-app.get("/", (req, res, next) => {
-  return res.status(200).json({
-    message: "Hello from root!",
-  });
+const puppeteer = require("puppeteer");
+require("dotenv").config();
+
+const config = {
+  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
+  channelSecret: process.env.CHANNEL_SECRET,
+};
+
+const client = new line.Client(config);
+app.use("/webhook", line.middleware(config));
+
+app.post("/webhook", (req, res) => {
+  Promise.all(req.body.events.map(handleEvent))
+    .then((result) => res.json(result))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).end();
+    });
 });
 
-app.get("/path", (req, res, next) => {
-  return res.status(200).json({
-    message: "Hello from path!",
-  });
-});
+function handleEvent(event) {
+  if (event.type !== "message" || event.message.type !== "text") {
+    return Promise.resolve(null);
+  }
+  const echo = { type: "text", text: event.message.text };
+  return client.replyMessage(event.replyToken, echo);
+}
 
-app.use((req, res, next) => {
-  return res.status(404).json({
-    error: "Not Found",
-  });
-});
-
-module.exports.handler = serverless(app);
+const server = serverless(app);
+module.exports.handler = server;
