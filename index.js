@@ -41,9 +41,7 @@ async function handleEvent(event) {
   const page = await browser.newPage();
 
   try {
-    await page.goto(
-      "https://www.amazon.co.jp/hz/wishlist/ls/3CKVTKBS6QK6F/ref=nav_wishlist_lists_1"
-    );
+    await page.goto(process.env.AMAZON_WISHLIST_URL);
 
     const itemList = await scrapeAmazonWishlist(page);
     console.log("Sending itemList:", itemList);
