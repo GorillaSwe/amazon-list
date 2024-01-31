@@ -1,6 +1,8 @@
 service: amazon-list-price-reporter
 frameworkVersion: "3"
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -8,7 +10,12 @@ provider:
 
 functions:
   api:
-    handler: index.handler
+    handler: src/index.handler
+    environment:
+      AMAZON_WISHLIST_URL: ${env:AMAZON_WISHLIST_URL}
+      CHANNEL_ACCESS_TOKEN: ${env:CHANNEL_ACCESS_TOKEN}
+      CHANNEL_SECRET: ${env:CHANNEL_SECRET}
+    timeout: 30
     events:
       - http:
           method: post
