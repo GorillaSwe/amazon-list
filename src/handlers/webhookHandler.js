@@ -1,43 +1,15 @@
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
-const { scrapeAmazonWishlist } = require("../utils/scrapeAmazonWishlist");
-const line = require("@line/bot-sdk");
-const lineConfig = require("../../config/lineConfig");
+const { getWishlistData } = require("../utils/getWishlistData");
+const { sendMessage } = require("../utils/messageSender");
 
-const client = new line.Client(lineConfig);
-
-async function handleEvent(event) {
-  if (event.type !== "message" || event.message.type !== "text") {
-    return Promise.resolve(null);
-  }
-
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
-    ignoreHTTPSErrors: true,
-  });
-
-  const page = await browser.newPage();
+async function handleWebhookEvent(event) {
+  if (event.type !== "message") return Promise.resolve(null);
 
   try {
-    await page.goto(process.env.AMAZON_WISHLIST_URL);
-
-    const itemList = await scrapeAmazonWishlist(page);
-
-    await browser.close();
-    const responseText = itemList
-      .map((item) => `${item.title}: ${item.price}円`)
-      .join("\n");
-
-    const echo = { type: "text", text: responseText };
-    return client.replyMessage(event.replyToken, echo);
+    const responseText = await getWishlistData();
+    await sendMessage(responseText, { replyToken: event.replyToken });
   } catch (err) {
     console.error(err);
-    await browser.close();
-    res.status(500).end();
   }
 }
 
-module.exports = { handleEvent };
+module.exports = { handleWebhookEvent };
