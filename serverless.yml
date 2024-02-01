@@ -7,20 +7,27 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ap-northeast-1
+  environment:
+    AMAZON_WISHLIST_URL: ${env:AMAZON_WISHLIST_URL}
+    CHANNEL_ACCESS_TOKEN: ${env:CHANNEL_ACCESS_TOKEN}
+    CHANNEL_SECRET: ${env:CHANNEL_SECRET}
+    USER_ID: ${env:USER_ID}
+  timeout: 30
 
 functions:
-  api:
+  app:
     handler: src/index.handler
-    environment:
-      AMAZON_WISHLIST_URL: ${env:AMAZON_WISHLIST_URL}
-      CHANNEL_ACCESS_TOKEN: ${env:CHANNEL_ACCESS_TOKEN}
-      CHANNEL_SECRET: ${env:CHANNEL_SECRET}
-    timeout: 30
     events:
       - http:
           method: post
           path: "/webhook"
           cors: true
+  scheduledTask:
+    handler: src/handlers/scheduledHandler.handleScheduledEvent
+    events:
+      - schedule:
+          rate: cron(0 22 * * ? *)
+          enabled: true
 
 plugins:
   - serverless-offline
