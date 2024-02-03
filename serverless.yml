@@ -1,4 +1,4 @@
-service: amazon-list-price-reporter
+service: amazon-wishlist-to-line
 frameworkVersion: "3"
 
 useDotenv: true
