@@ -15,14 +15,14 @@ provider:
   timeout: 30
 
 functions:
-  app:
+  lineWebhookHandler:
     handler: src/index.handler
     events:
       - http:
           method: post
           path: "/webhook"
           cors: true
-  scheduledTask:
+  scheduledHandler:
     handler: src/handlers/scheduledHandler.handleScheduledEvent
     events:
       - schedule:
