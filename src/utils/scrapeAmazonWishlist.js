@@ -15,19 +15,15 @@ async function scrapeAmazonWishlist(page) {
     [...document.querySelectorAll('div[id^="itemMain_"]')].forEach(
       (detailDiv) => {
         const titleElement = detailDiv.querySelector('a[id^="itemName_"]');
+        let title = "";
+        let href = "";
         if (titleElement) {
           title = titleElement.textContent.trim();
+          href = titleElement.href;
         }
 
-        let price = -1;
-        const priceElement = detailDiv.querySelector("span.a-offscreen");
-        if (priceElement) {
-          const priceText = priceElement.textContent.trim();
-          price = Number(priceText.replace("￥", "").replace(",", ""));
-        }
-
-        if (title && price !== -1) {
-          itemList.push({ title, price });
+        if (title && href) {
+          itemList.push({ title, href });
         }
       }
     );
