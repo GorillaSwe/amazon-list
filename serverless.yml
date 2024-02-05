@@ -12,7 +12,7 @@ provider:
     CHANNEL_ACCESS_TOKEN: ${env:CHANNEL_ACCESS_TOKEN}
     CHANNEL_SECRET: ${env:CHANNEL_SECRET}
     USER_ID: ${env:USER_ID}
-  timeout: 30
+  timeout: 600
 
 functions:
   lineWebhookHandler:
