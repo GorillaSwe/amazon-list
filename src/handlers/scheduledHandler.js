@@ -1,13 +1,12 @@
-const { getWishlistData } = require("../utils/getWishlistData");
+const { getWishlistData } = require("../services/wishlistService");
 const { sendMessage } = require("../utils/messageSender");
-const USER_ID = process.env.USER_ID;
 
 async function handleScheduledEvent() {
   try {
     const responseText = await getWishlistData();
-    await sendMessage(responseText, USER_ID);
+    await sendMessage(responseText, process.env.USER_ID);
   } catch (err) {
-    console.error(err);
+    console.error("Failed to handle scheduled event:", err);
   }
 }
 
