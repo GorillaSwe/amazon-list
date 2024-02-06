@@ -1,4 +1,4 @@
-async function scrapeItemDetail(page, items) {
+async function scrapeItemDetails(page, items) {
   const itemDetails = [];
 
   for (const item of items) {
@@ -11,12 +11,13 @@ async function scrapeItemDetail(page, items) {
 
 async function getItemDetails(page, item) {
   await page.goto(item.href);
-
   const details = await page.evaluate(() => {
-    const getTextContent = (selector) => {
-      const content = document.querySelector(selector)?.textContent.trim();
-      return content ? content.replace("(", "").replace(")", "") : null;
-    };
+    const getTextContent = (selector) =>
+      document
+        .querySelector(selector)
+        ?.textContent.trim()
+        .replace("(", "")
+        .replace(")", "") || null;
 
     const kindlePrice = getTextContent(
       "#tmm-grid-swatch-KINDLE .slot-price > span"
@@ -30,7 +31,6 @@ async function getItemDetails(page, item) {
     )
       ? "#tmm-grid-swatch-PAPERBACK"
       : "#tmm-grid-swatch-HARDCOVER";
-
     const bookPrice = getTextContent(
       `${paperbackOrHardcoverSelector} .slot-price > span`
     );
@@ -44,4 +44,4 @@ async function getItemDetails(page, item) {
   return details;
 }
 
-module.exports = { scrapeItemDetail };
+module.exports = { scrapeItemDetails };
