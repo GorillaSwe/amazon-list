@@ -1,106 +1,66 @@
-<!--
-title: 'Serverless Framework Node Express API on AWS'
-description: 'This template demonstrates how to develop and deploy a simple Node Express API running on AWS Lambda using the traditional Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# Kindle Wishlist to Line
 
-# Serverless Framework Node Express API on AWS
+## 概要
 
-This template demonstrates how to develop and deploy a simple Node Express API service running on AWS Lambda using the traditional Serverless Framework.
+このプロジェクトは、Amazonのほしい物リストをLINE Botに自動的に送信するプロセスを自動化します。  
+Puppeteerを使用してスクレイピングし、LINE Messaging APIを通知に使用します。
 
-## Anatomy of the template
+このプロジェクトは、主に **_Kindle_** のほしい物リストに最適化されています。  
+そのため、Kindle以外のアイテムを含むほしい物リストを使用すると、期待通りに機能しない可能性があります。
 
-This template configures a single function, `api`, which is responsible for handling all incoming requests thanks to the `httpApi` event. To learn more about `httpApi` event configuration options, please refer to [httpApi event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/). As the event is configured in a way to accept all incoming requests, `express` framework is responsible for routing and handling requests internally. Implementation takes advantage of `serverless-http` package, which allows you to wrap existing `express` applications. To learn more about `serverless-http`, please refer to corresponding [GitHub repository](https://github.com/dougmoscrop/serverless-http).
+## 準備
 
-## Usage
+### 1. リポジトリのクローン
 
-### Deployment
+    $ git clone https://github.com/GorillaSwe/kindle-wishlist-to-line.git
 
-Install dependencies with:
+### 2. AWS IAM と AWS CLI の設定
 
-```
-npm install
-```
+- IAMユーザーを作成し、AWS LambdaとAPI Gatewayに必要な権限を割り当てます。
+- AWS CLIをインストールし、IAMユーザーの認証情報で設定します。
 
-and then deploy with:
+### 3. パッケージのインストール
 
-```
-serverless deploy
-```
+    $ npm install
 
-After running deploy, you should see output similar to:
+### 4. Line Bot の準備
 
-```bash
-Deploying aws-node-express-api-project to stage dev (us-east-1)
+- LINE Messaging APIチャネルを作成します。
+- Webhookを有効にします。
+- `CHANNEL_ACCESS_TOKEN`、`CHANNEL_SECRET`、および`USER_ID`を取得します。
 
-✔ Service deployed to stack aws-node-express-api-project-dev (196s)
+### 5. `.env` ファイルの準備
 
-endpoint: ANY - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com
-functions:
-  api: aws-node-express-api-project-dev-api (766 kB)
+- LINE Messaging APIの認証情報とAmazonのほしい物リストのURLを.envファイルに記入します。
+- Amazonのほしい物リストが **_公開_** に設定されていることを確認します。
+
+```dosini
+# .env
+CHANNEL_ACCESS_TOKEN=[Your Line Access Token]
+CHANNEL_SECRET=[Your Line Channel Secret]
+USER_ID=[Your Line User ID]
+AMAZON_WISHLIST_URL=[Your Amazon Wishlist URL]
 ```
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [`httpApi` event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/).
+### 6. AWS へのデプロイ
 
-### Invocation
+    $ npm run deploy
 
-After successful deployment, you can call the created application via HTTP:
+- Lambda関数がデプロイされ、API GatewayのエンドポイントURLが表示されます。
 
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
+### 7. Webhook URL の設定
 
-Which should result in the following response:
+- LINE Developersダッシュボードで、エンドポイントURLをLINEボットのWebhook URLに設定します。
 
-```
-{"message":"Hello from root!"}
-```
+## 通知トリガー
 
-Calling the `/hello` path with:
+このアプリケーションは、2つのシナリオでLINEに通知を送ります。
 
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/hello
-```
+### 1. スケジュール通知
 
-Should result in the following response:
+定義されたスケジュールに基づいて自動的に通知が送られます。  
+AWS EventBridgeを使用して設定されたスケジュールに従い、ほしい物リストを定期的にLINEに通知します。
 
-```bash
-{"message":"Hello from path!"}
-```
+### 2. メッセージに対する返信
 
-If you try to invoke a path or method that does not have a configured handler, e.g. with:
-
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/nonexistent
-```
-
-You should receive the following response:
-
-```bash
-{"error":"Not Found"}
-```
-
-### Local development
-
-It is also possible to emulate API Gateway and Lambda locally by using `serverless-offline` plugin. In order to do that, execute the following command:
-
-```bash
-serverless plugin install -n serverless-offline
-```
-
-It will add the `serverless-offline` plugin to `devDependencies` in `package.json` file as well as will add it to `plugins` in `serverless.yml`.
-
-After installation, you can start local emulation with:
-
-```
-serverless offline
-```
-
-To learn more about the capabilities of `serverless-offline`, please refer to its [GitHub repository](https://github.com/dherault/serverless-offline).
+LINEボットへのメッセージ送信をトリガーとして、最新のほしい物リストを返信します。
