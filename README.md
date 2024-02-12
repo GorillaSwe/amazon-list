@@ -6,7 +6,7 @@ Amazonのほしい物リストをスクレイピングし、その情報を通�
 Amazon EventBridgeによる定期実行、もしくはメッセージに対する応答として、Kindle版と紙の本の価格やポイントを通知するLINE Botです。
 
 詳細な構築手順は、Qiitaの記事に記載しています。  
-興味のある方は是非チェックしてみてください。
+興味のある方は是非チェックしてみてください。  
 https://qiita.com/GorillaSwe/items/fc207dd6abc1cd0589ef
 
 ![kindle-wishlist-to-line](https://github.com/GorillaSwe/kindle-wishlist-to-line/assets/52732673/6b12835f-a920-44a1-aaa0-c52ae0c75177)
